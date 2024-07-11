@@ -26,8 +26,8 @@ def create_assistant(specialization):
             instructions=f"""
             You are a highly specialized assistant created to provide information and guidance on {specialization}-related procedures and benefits offered by the National Social Security Administration (ANSES) in Argentina.
             """,
-            model="gpt-4o",
-            tools=[{"type": "file_search"}]
+            model="gpt-4o",  
+            tools=[{"type": "file_search"}]  #
         )
         return assistant.id
     except Exception as e:
@@ -85,25 +85,6 @@ def create_run(thread_id, assistant_id):
         return None
 
 # Function to retrieve the assistant's response message
-# def get_assistant_response(thread_id, run_id):
-#     try:
-#         run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
-#         while run.status not in ["completed", "failed"]:
-#             run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
-#             st.write(f"Run status: {run.status}")
-
-#         if run.status == "completed":
-#             messages = client.beta.threads.messages.list(thread_id=thread_id)
-#             for message in messages.data:
-#                 if message.role == "assistant":
-#                     return message.content
-#         else:
-#             st.error("Run failed or was incomplete.")
-#             return None
-#     except Exception as e:
-#         st.error(f"Error getting assistant response: {str(e)}")
-#         return None
-
 def get_assistant_response(thread_id, run_id):
     try:
         with st.spinner('Assistant is thinking...'):
@@ -124,18 +105,12 @@ def get_assistant_response(thread_id, run_id):
         return None
 
 # Function to format the assistant's response
-# def format_response(response):
-#     if response:
-#         return "\n".join([content.text.value for content in response])
-#     return "No response received."
-
 def format_response(response):
     if response and isinstance(response, list):
         return "\n".join([content.text.value for content in response if hasattr(content, 'text')])
     elif response and isinstance(response, str):
         return response
     return "No response received."
-
 
 # Initialize session state for chat history
 if "messages" not in st.session_state:
@@ -164,32 +139,20 @@ if prompt := st.chat_input("Ask a question about ANSES procedures and benefits:"
         # Create a run
         run_response = create_run(st.session_state.thread_id, assistant_id)
 
-        # if run_response and hasattr(run_response, 'id'):
-        #     # Retrieve the Assistant's response message
-        #     response_message = get_assistant_response(st.session_state.thread_id, run_response.id)
+        if run_response:
+            # Retrieve the Assistant's response message
+            response_message = get_assistant_response(st.session_state.thread_id, run_response.id)
 
-        #     # Format and display the Assistant's response
-        #     formatted_response = format_response(response_message)
-        #     st.session_state.messages.append({"role": "assistant", "content": formatted_response})
-        #     with st.chat_message("assistant"):
-        #         st.markdown(formatted_response)
-        # else:
-        #     st.error("Failed to create a run. Please try again.")
-    
-    if run_response:
-    # Retrieve the Assistant's response message
-    response_message = get_assistant_response(st.session_state.thread_id, run_response.id)
-
-        # Format and display the Assistant's response
-        formatted_response = format_response(response_message)
-        if formatted_response != "No response received.":
-            st.session_state.messages.append({"role": "assistant", "content": formatted_response})
-            with st.chat_message("assistant"):
-                st.markdown(formatted_response)
+            # Format and display the Assistant's response
+            formatted_response = format_response(response_message)
+            if formatted_response != "No response received.":
+                st.session_state.messages.append({"role": "assistant", "content": formatted_response})
+                with st.chat_message("assistant"):
+                    st.markdown(formatted_response)
+            else:
+                st.error("No response received from the assistant. Please try again.")
         else:
-            st.error("No response received from the assistant. Please try again.")
-    else:
-        st.error("Failed to create a run. Please try again.")
+            st.error("Failed to create a run. Please try again.")
 
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")

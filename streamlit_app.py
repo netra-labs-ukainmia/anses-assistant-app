@@ -7,8 +7,8 @@ import traceback
 st.title("ANSES Assistant")
 
 # Use Streamlit secrets for API keys
-serper_api_key = st.secrets["SERPER_API_KEY"]
-openai_api_key = st.secrets["OPENAI_API_KEY"]
+serper_api_key = st.secrets.SERPER_API_KEY
+openai_api_key = st.secrets.OPENAI_API_KEY
 
 # Set up API keys
 os.environ["SERPER_API_KEY"] = serper_api_key

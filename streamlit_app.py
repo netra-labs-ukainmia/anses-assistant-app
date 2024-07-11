@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 import os
 from openai import OpenAI
@@ -82,4 +81,3 @@ if serper_api_key and openai_api_key:
 
 else:
     st.warning("Please enter your API keys in the sidebar to use the ANSES Assistant.")
-```

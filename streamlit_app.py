@@ -84,12 +84,33 @@ def create_run(thread_id, assistant_id):
         return None
 
 # Function to retrieve the assistant's response message
+# def get_assistant_response(thread_id, run_id):
+#     try:
+#         run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
+#         while run.status not in ["completed", "failed"]:
+#             run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
+#             st.write(f"Run status: {run.status}")
+
+#         if run.status == "completed":
+#             messages = client.beta.threads.messages.list(thread_id=thread_id)
+#             for message in messages.data:
+#                 if message.role == "assistant":
+#                     return message.content
+#         else:
+#             st.error("Run failed or was incomplete.")
+#             return None
+#     except Exception as e:
+#         st.error(f"Error getting assistant response: {str(e)}")
+#         return None
+
 def get_assistant_response(thread_id, run_id):
     try:
-        run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
-        while run.status not in ["completed", "failed"]:
-            run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
-            st.write(f"Run status: {run.status}")
+        with st.spinner('Assistant is thinking...'):
+            while True:
+                run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
+                if run.status in ["completed", "failed"]:
+                    break
+                time.sleep(1)  # Wait for 1 second before checking again
 
         if run.status == "completed":
             messages = client.beta.threads.messages.list(thread_id=thread_id)

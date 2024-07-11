@@ -28,7 +28,7 @@ if serper_api_key and openai_api_key:
                 You are a highly specialized assistant created to provide information and guidance on {specialization}-related procedures and benefits offered by the National Social Security Administration (ANSES) in Argentina.
                 """,
                 model="gpt-4o",
-                tools=[{"type": "retrieval"}]
+                tools=[{"type": "file_search"}]
             )
             return assistant.id
         except Exception as e:

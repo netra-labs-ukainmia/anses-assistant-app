@@ -144,7 +144,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Chat input
-if prompt := st.chat_input("Ask a question about ANSES retirement procedures:"):
+if prompt := st.chat_input("Ask a question about ANSES procedures or benefits:"):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -178,14 +178,16 @@ if prompt := st.chat_input("Ask a question about ANSES retirement procedures:"):
 
 # Add some context about ANSES retirement procedures
 st.sidebar.markdown("""
-## ANSES Retirement Procedures
+## ANSES Procedures and Benefits
 
 This assistant can help you with information about:
 
-- How to start your retirement process
-- Required documentation
-- Eligibility criteria
-- Types of retirement benefits
+- Retirement and Pensions
+- Family Allowances
+- Work-related Information
+- Social Programs
+- Payment Schedules
+- And more!
 
-For official information, please visit [ANSES Retirement and Pensions](https://www.anses.gob.ar/jubilaciones-y-pensiones).
+For official information, please visit [ANSES Official Website](https://www.anses.gob.ar/).
 """)

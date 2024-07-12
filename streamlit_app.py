@@ -18,7 +18,7 @@ os.environ["OPENAI_API_KEY"] = openai_api_key
 # Initialize OpenAI client
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
-# Function to create a new assistant (keep your existing implementation)
+# Function to create a new assistant
 def create_assistant(specialization):
     try:
         assistant = client.beta.assistants.create(
@@ -38,7 +38,67 @@ def create_assistant(specialization):
 # Create Retirement Assistant
 retirement_assistant_id = create_assistant("Retirement")
 
-# Keep your existing functions (create_thread, add_message, create_run, get_assistant_response, format_response)
+# Function to create a new thread
+def create_thread():
+    try:
+        thread = client.beta.threads.create()
+        return thread.id
+    except Exception as e:
+        st.error(f"Error creating thread: {str(e)}")
+        return None
+
+# Function to add a message to the thread
+def add_message(thread_id, content):
+    try:
+        message = client.beta.threads.messages.create(
+            thread_id=thread_id,
+            role="user",
+            content=content
+        )
+        return message.id
+    except Exception as e:
+        st.error(f"Error adding message: {str(e)}")
+        return None
+
+# Function to create a run and get the assistant's response
+def create_run(thread_id, assistant_id):
+    try:
+        run = client.beta.threads.runs.create(
+            thread_id=thread_id,
+            assistant_id=assistant_id
+        )
+        return run
+    except Exception as e:
+        st.error(f"Error creating run: {str(e)}")
+        return None
+
+# Function to retrieve the assistant's response message
+def get_assistant_response(thread_id, run_id):
+    try:
+        with st.spinner('Assistant is thinking...'):
+            while True:
+                run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id)
+                if run.status == "completed":
+                    messages = client.beta.threads.messages.list(thread_id=thread_id)
+                    for message in messages.data:
+                        if message.role == "assistant":
+                            return message.content
+                    return None  # If no assistant message found
+                elif run.status == "failed":
+                    st.error("Run failed.")
+                    return None
+                time.sleep(1)  # Wait for 1 second before checking again
+    except Exception as e:
+        st.error(f"Error getting assistant response: {str(e)}")
+        return None
+
+# Function to format the assistant's response
+def format_response(response):
+    if response and isinstance(response, list):
+        return "\n".join([content.text.value for content in response if hasattr(content, 'text')])
+    elif response and isinstance(response, str):
+        return response
+    return "No response received."
 
 # Initialize session state for chat history
 if "messages" not in st.session_state:
@@ -66,8 +126,7 @@ if prompt := st.chat_input("Ask a question about ANSES retirement procedures:"):
 
         if run_response:
             # Retrieve the Assistant's response message
-            with st.spinner('Assistant is thinking...'):
-                response_message = get_assistant_response(st.session_state.thread_id, run_response.id)
+            response_message = get_assistant_response(st.session_state.thread_id, run_response.id)
 
             # Format and display the Assistant's response
             formatted_response = format_response(response_message)
